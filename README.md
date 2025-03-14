@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Typing Race Game
 
-## Getting Started
+Welcome to **Typing Race Game**, a real-time typing competition application built with Next.js (React), TypeScript, Socket.IO, and Node.js. Test your typing skills against computer opponents or (in development) race against other players online!
 
-First, run the development server:
+## Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Typing Race Game allows users to practice their typing speed and accuracy in an engaging, race-themed environment. The project features a sleek UI with a race track visualization, real-time progress updates, and a leaderboard. Currently, it supports practice mode and player vs. computer mode, with multiplayer mode actively in development.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Real-Time Typing Feedback**: See your progress, WPM (words per minute), and accuracy as you type.
+- **Race Track Visualization**: Watch your car move along the track based on your typing progress.
+- **Leaderboard**: View rankings and stats for all participants in the race.
+- **Countdown Timer**: A 5-second countdown before the race begins.
+- **Results Modal**: Displays final standings and stats after the race ends.
+- **Responsive Design**: Works seamlessly on desktop and mobile devices.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Game Modes
 
-## Learn More
+### 1. Practice Mode
+- **Description**: A solo mode where you can type a randomly selected text at your own pace.
+- **Status**: Fully working.
+- **How to Play**: Access via the race page without specifying a mode (e.g., `/race/test?name=Player1`).
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Player vs. Computer
+- **Description**: Compete against AI-controlled bots with customizable difficulty levels (easy, medium, hard).
+- **Status**: Fully working.
+- **How to Play**: Navigate to `/race/[raceId]?mode=computer&name=Player1&difficulty=medium&bots=3`.
+  - `difficulty`: `easy`, `medium`, `hard`, or `mixed`.
+  - `bots`: Number of computer opponents (default: 3).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 3. Multiplayer Mode (In Progress)
+- **Description**: Race against other real players in real-time using Socket.IO for synchronization.
+- **Status**: In development. Core functionality (room creation, joining, and typing updates) is implemented but currently experiences infinite loop issues with `useEffect`. Work is ongoing to stabilize this mode.
+- **How to Play (WIP)**:
+  1. Create a race at `/create`.
+  2. Share the race code with friends.
+  3. Join via `/join` with the code.
+  4. Start the race from the race page (`/race/[raceId]`).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Prerequisites
 
-## Deploy on Vercel
+- **Node.js**: v16.x or higher
+- **npm**: v7.x or higher (or use yarn/pnpm if preferred)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Setup
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Backend <coming soon>
+1. **Navigate to the backend directory** (if separate, e.g., `backend/`):
+   ```bash
+   cd backend
+   ```
+2. **Install dependencies** (if using npm):
+   ```bash
+   npm install
+   ```
+3. **Run the backend server** (if using npm):
+   ```bash
+   npm run dev
+   ```
+
+### Frontend
+1. **Install dependencies** (if using npm):
+   ```bash
+   npm install
+   ```
+2. **Run the frontend development server** (if using npm):
+   ```bash
+   npm run dev
+   ```
+ - Runs on https://localhost:3000
+
+## Development Status
+- Practice Mode: Complete and stable.
+- Player vs. Computer: Complete and stable.
+- Multiplayer Mode: In progress. Issues with infinite `useEffect` loops in `race/[id]/page.tsx` are being debugged. The Socket.IO server handles room creation and real-time updates, but frontend synchronization needs refinement.
+
+## Future Improvements
+- Stabilize Multiplayer: Fix infinite loop issues and ensure smooth real-time updates.
+- Public Races: Implement a public race list for joining random games.
+- Custom Texts: Allow users to input custom typing texts.
+- Enhanced UI: Add animations and sound effects for a more immersive experience.
+- Deployment: Deploy backend (e.g., Render) and frontend (e.g., Vercel) for online play.
+
+## License
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+## Acknowledgments
+Built with Next.js, Socket.IO, and Shadcn/UI.
+Inspired by typing race games like [TypeRacer](https://typeracer.com) and [Nitro Type](https://nitrotype.com).
