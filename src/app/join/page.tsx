@@ -32,15 +32,28 @@ export default function JoinRace() {
     // Connect to the socket with the race details
     connectSocket(raceCode, playerName);
 
-    // Listen for the initial gameState to confirm the race exists
-    socket?.on("gameState", () => {
-      router.push(`/race/${raceCode}?name=${encodeURIComponent(playerName)}`);
-    });
+    // Emit a joinRace event to check if the race exists
+    socket?.emit("joinRace", { raceId: raceCode, playerName });
 
-    socket?.on("error", (err: string) => {
-      setError(err || "Invalid race code or race has already started");
-    });
+    // Navigate directly to the race page after attempting to join
+    router.push(`/race/${raceCode}?name=${encodeURIComponent(playerName)}`);
   };
+
+  // Set up event listeners when component mounts
+  useState(() => {
+    if (socket) {
+      socket.on("error", (err: string) => {
+        setError(err || "Invalid race code or race has already started");
+      });
+    }
+    
+    return () => {
+      // Clean up event listeners
+      if (socket) {
+        socket.off("error");
+      }
+    };
+  });
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-4">

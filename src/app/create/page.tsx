@@ -35,7 +35,7 @@ export default function CreateRace() {
     setRaceCreated(true);
 
     // Connect to the socket with the race details
-    connectSocket(generatedCode, playerName, true, 3, difficulty); // Assuming 3 bots for now
+    connectSocket(generatedCode, playerName, true, 0, difficulty); // Assuming 3 bots for now
   };
 
   const handleStartRace = () => {
@@ -44,7 +44,7 @@ export default function CreateRace() {
     }
   };
 
-  const copyRaceCode = () => {
+  const copyRaceCode = () => { 
     navigator.clipboard.writeText(raceCode);
   };
 

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 // app/race/[id]/page.tsx
 "use client";
 
@@ -149,6 +148,8 @@ class ComputerPlayer {
     }
   }
 }
+// Near the top with other constants
+const GAME_TIME_LIMIT = 3 * 60; // 3 minutes in seconds
 
 export default function RacePage() {
   const params = useParams();
@@ -158,6 +159,10 @@ export default function RacePage() {
   const isComputerMode = searchParams.get("mode") === "computer";
   const numBots = Number.parseInt(searchParams.get("bots") || "3", 10);
   const difficulty = searchParams.get("difficulty") || "medium";
+
+    // Add a new state for the game timer
+    const [gameTimeRemaining, setGameTimeRemaining] = useState<number>(GAME_TIME_LIMIT);
+    const gameTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const { socket, gameState, connectSocket, startRace: startSocketRace, updateProgress, playerFinished } = useSocket();
   const [localGameState, setLocalGameState] = useState<GameState>({
@@ -173,11 +178,11 @@ export default function RacePage() {
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [computerPlayers, setComputerPlayers] = useState<ComputerPlayer[]>([]);
   const [showResultsModal, setShowResultsModal] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false); // New flag to prevent re-init
 
   const typingAreaRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  // Memoize initializeComputerPlayers
   const initializeComputerPlayers = useCallback(
     (text: string) => {
       const bots: ComputerPlayer[] = [];
@@ -195,7 +200,6 @@ export default function RacePage() {
     [numBots, difficulty, raceId]
   );
 
-  // Memoize handleBotUpdate
   const handleBotUpdate = useCallback(
     (updatedBot: ComputerPlayer) => {
       setLocalGameState((prevState) => {
@@ -239,8 +243,10 @@ export default function RacePage() {
     [toast]
   );
 
-  // Initialize game mode (runs once on mount)
+  // Initialize game mode (runs only once on mount)
   useEffect(() => {
+    if (hasInitialized) return; // Prevent re-running
+
     if (isComputerMode) {
       const randomText = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
       const localPlayerId = `player-${Date.now()}`;
@@ -271,27 +277,26 @@ export default function RacePage() {
       setLocalGameState(initialState);
       setComputerPlayers(bots);
     } else {
-      connectSocket(raceId, playerName, false); // Connect only once
+      connectSocket(raceId, playerName, false);
     }
 
-    // No cleanup needed here since socket cleanup is handled in SocketContext
-  }, [isComputerMode, raceId, playerName, connectSocket, initializeComputerPlayers]); // Stable dependencies
+    setHasInitialized(true); // Mark as initialized
+  }, [isComputerMode, raceId, playerName, connectSocket, initializeComputerPlayers, hasInitialized]);
 
   // Set playerId for multiplayer mode (runs when socket connects)
   useEffect(() => {
     if (!isComputerMode && socket && !playerId) {
       const handleConnect = () => {
-        setPlayerId(socket?.id!);
+        setPlayerId(socket.id);
       };
       socket.on("connect", handleConnect);
-
       return () => {
         socket.off("connect", handleConnect);
       };
     }
-  }, [socket, isComputerMode, playerId]); // Add playerId to prevent re-running after set
+  }, [socket, isComputerMode, playerId]);
 
-  // Show results modal when race finishes
+  // Show results modal when race finishes (optimized to avoid loops)
   useEffect(() => {
     const state = isComputerMode ? localGameState : gameState;
     if (state?.status === "finished" && !showResultsModal) {
@@ -300,7 +305,7 @@ export default function RacePage() {
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [isComputerMode, localGameState, gameState, showResultsModal]); // Use full objects as dependencies
+  }, [isComputerMode, localGameState.status, gameState?.status, showResultsModal]); // Use status only
 
   // Handle typing input
   const handleTyping = (input: string) => {
@@ -431,8 +436,62 @@ export default function RacePage() {
     }
   };
 
+  // Add a new effect to handle the game timer
+  useEffect(() => {
+    if ((isComputerMode ? localGameState.status : gameState?.status) === "racing") {
+      // Start the timer when race begins
+      gameTimerRef.current = setInterval(() => {
+        setGameTimeRemaining(prev => {
+          if (prev <= 1) {
+            // Time's up - end the race
+            if (isComputerMode) {
+              setLocalGameState(prevState => ({
+                ...prevState,
+                status: "finished",
+                endTime: Date.now()
+              }));
+              computerPlayers.forEach(bot => bot.stopTyping());
+            } else if (socket) {
+              // For multiplayer, we could emit an event to end the race
+              // This depends on your socket implementation
+              playerFinished();
+            }
+            
+            // Clear the interval
+            if (gameTimerRef.current) {
+              clearInterval(gameTimerRef.current);
+              gameTimerRef.current = null;
+            }
+            
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else if ((isComputerMode ? localGameState.status : gameState?.status) === "waiting") {
+      // Reset timer when in waiting state
+      setGameTimeRemaining(GAME_TIME_LIMIT);
+    }
+    
+    return () => {
+      if (gameTimerRef.current) {
+        clearInterval(gameTimerRef.current);
+        gameTimerRef.current = null;
+      }
+    };
+  }, [isComputerMode ? localGameState.status : gameState?.status]);
+
+
   const activeGameState = isComputerMode ? localGameState : gameState;
   const currentPlayer = activeGameState?.players.find((p) => p.id === playerId);
+
+    // Add a function to format the time
+    const formatTime = (seconds: number): string => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+      };
+    
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-4">
@@ -509,12 +568,24 @@ export default function RacePage() {
               </div>
             )}
           </div>
+      <div className="space-y-4">
+
+      {(activeGameState?.status === "racing" || activeGameState?.status === "countdown") && (
+              <div className="bg-white rounded-lg shadow-lg p-4 text-center">
+                <h3 className="text-lg font-medium mb-2">Time Remaining</h3>
+                <div className={`text-2xl font-bold ${gameTimeRemaining < 30 ? 'text-red-600' : ''}`}>
+                  {formatTime(gameTimeRemaining)}
+                </div>
+              </div>
+            )}
 
           <div className="bg-white rounded-lg shadow-lg p-4 h-fit">
             <Leaderboard players={activeGameState?.players || []} currentPlayerId={playerId || ""} />
           </div>
+          </div>
         </div>
       </div>
+
 
       {activeGameState?.status === "finished" && activeGameState?.players && Array.isArray(activeGameState.players) && (
         <RaceResultsModal
