@@ -158,7 +158,7 @@ export default function PracticePage() {
         </Card>
 
         <div className="flex justify-center">
-          <Button onClick={resetPractice} className="flex items-center bg-blue-600 hover:bg-blue-700">
+          <Button onClick={resetPractice} className="flex items-center bg-blue-500 hover:bg-blue-500 border-2 border-b-4 border-blue-600 transition-all active:scale-95 hover:border-t-4 hover:border-b-2">
             <RefreshCw className="mr-2 h-4 w-4" />
             New Text
           </Button>

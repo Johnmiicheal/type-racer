@@ -108,7 +108,7 @@ export default function ComputerRacePage() {
 
           <CardFooter>
             <Button
-              className="w-full bg-blue-600 hover:bg-blue-700"
+              className="w-full bg-blue-500 hover:bg-blue-500 border-2 border-b-4 border-blue-600 transition-all active:scale-95 hover:border-t-4 hover:border-b-2"
               onClick={handleStartRace}
               disabled={!playerName.trim()}
             >

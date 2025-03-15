@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Trophy, Medal, Award, RefreshCw } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { memo } from "react"
 
 interface Player {
@@ -54,6 +55,8 @@ const RaceResultsModal = memo(function RaceResultsModal({
     return b.progress - a.progress
   })
 
+  const router = useRouter()
+
   // Get current player's position
   const currentPlayer = players.find((p) => p.id === currentPlayerId)
   const currentPlayerPosition = currentPlayer?.position || 0
@@ -92,7 +95,7 @@ const RaceResultsModal = memo(function RaceResultsModal({
               <div
                 key={player.id}
                 className={`flex items-center p-3 rounded-lg ${
-                  player.id === currentPlayerId ? "bg-blue-50 border border-blue-200" : "bg-gray-50"
+                  player.id === currentPlayerId ? "bg-blue-50 border-2 border-blue-200 border-b-4" : "bg-gray-50"
                 }`}
               >
                 <div className="flex items-center justify-center w-8 h-8">{getMedalIcon(index + 1)}</div>
@@ -118,11 +121,11 @@ const RaceResultsModal = memo(function RaceResultsModal({
           </div>
         </div>
 
-        <DialogFooter className="sm:justify-between flex flex-col sm:flex-row gap-3">
-          <Button variant="outline" onClick={onClose}>
-            Close
+        <DialogFooter className="sm:justify-between flex flex-col sm:flex-row gap-3 h-fit">
+          <Button variant="outline" className="text-gray-500 hover:text-gray-500 border-2 border-b-4 border-gray-300 hover:border-t-4 hover:border-b-2 transition-all active:scale-95" onClick={() => router.push('/')}>
+            Return Home
           </Button>
-          <Button onClick={onRestart} className="bg-green-600 hover:bg-green-700">
+          <Button onClick={onRestart} className="bg-green-600 hover:bg-green-700 border-2 border-b-4 border-green-700 hover:border-green-800 hover:border-t-4 hover:border-b-2 transition-all active:scale-95">
             <RefreshCw className="mr-2 h-4 w-4" />
             Play Again
           </Button>

@@ -22,10 +22,10 @@ export default function Home() {
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 <Link href="/create" className="w-full">
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700">Create Race</Button>
+                  <Button className="w-full bg-blue-500 hover:bg-blue-500 border-2 border-b-4 border-blue-600 transition-all active:scale-95 hover:border-t-4 hover:border-b-2">Create Race</Button>
                 </Link>
                 <Link href="/join" className="w-full">
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700">Join Race</Button>
+                  <Button className="w-full bg-blue-500 hover:bg-blue-500 border-2 border-b-4 border-blue-600 transition-all active:scale-95 hover:border-t-4 hover:border-b-2">Join Race</Button>
                 </Link>
               </div>
             </CardContent>
@@ -42,7 +42,7 @@ export default function Home() {
             <CardContent>
               <p className="text-gray-600 mb-4">Challenge computer opponents with different typing speeds.</p>
               <Link href="/computer" className="w-full">
-                <Button className="w-full bg-green-600 hover:bg-green-700">Play vs Computer</Button>
+                <Button className="w-full bg-green-600 hover:bg-green-700 border-2 border-b-4 border-green-700 hover:border-green-800 hover:border-t-4 hover:border-b-2 transition-all active:scale-95">Play vs Computer</Button>
               </Link>
             </CardContent>
           </Card>

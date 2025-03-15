@@ -20,7 +20,8 @@ export default function CreateRace() {
   const [raceCode, setRaceCode] = useState("");
   const [playerName, setPlayerName] = useState("");
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
-  const [isPublic, setIsPublic] = useState(false);
+  const [useBot, setUseBot] = useState(false);
+  const [botCount, setBotCount] = useState(0);
   const [error, setError] = useState("");
 
   const handleCreateRace = () => {
@@ -95,10 +96,24 @@ export default function CreateRace() {
                   </RadioGroup>
                 </div>
 
+
                 <div className="flex items-center space-x-2">
-                  <Switch id="public-race" checked={isPublic} onCheckedChange={setIsPublic} />
-                  <Label htmlFor="public-race">Public Race</Label>
+                  <Switch id="use-bot" checked={useBot} onCheckedChange={setUseBot} />
+                  <Label htmlFor="use-bot">Add Bots</Label>
                 </div>
+                {useBot && (
+                  <div className="space-y-2">
+                    <Label htmlFor="botCount">Number of Bots</Label>
+                    <Input
+                      id="botCount"
+                      type="number"
+                      min="0"
+                      max="10"
+                      value={botCount}
+                      onChange={(e) => setBotCount(parseInt(e.target.value))}
+                    />
+                  </div>
+                )}
 
                 {error && <div className="text-red-500 text-sm">{error}</div>}
               </div>
@@ -129,14 +144,14 @@ export default function CreateRace() {
           <CardFooter>
             {!raceCreated ? (
               <Button
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                className="w-full bg-blue-500 hover:bg-blue-500 border-2 border-b-4 border-blue-600 transition-all active:scale-95 hover:border-t-4 hover:border-b-2"
                 onClick={handleCreateRace}
                 disabled={!playerName.trim()}
               >
                 Create Race
               </Button>
             ) : (
-              <Button className="w-full bg-green-600 hover:bg-green-700" onClick={handleStartRace}>
+              <Button className="w-full bg-green-600 hover:bg-green-700 border-2 border-b-4 border-green-700 hover:border-green-800 hover:border-t-4 hover:border-b-2 transition-all active:scale-95" onClick={handleStartRace}>
                 Start Race
               </Button>
             )}

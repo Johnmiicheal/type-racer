@@ -41,18 +41,33 @@ interface GameState {
 const sampleTexts = [
   "The quick brown fox jumps over the lazy dog. This pangram contains every letter of the English alphabet at least once.",
   "Programming is the process of creating a set of instructions that tell a computer how to perform a task.",
-  "The Internet is a global system of interconnected computer networks that use the standard Internet protocol suite."
+  "The Internet is a global system of interconnected computer networks that use the standard Internet protocol suite.",
 ];
 
 const botNames = [
-  "TypeBot", "SpeedTyper", "KeyMaster", "WordWizard",
-  "RapidKeys", "SwiftFingers", "TypePro", "KeyboardKing",
-  "QuickType", "FlashKeys", "TurboTyper", "NinjaKeys",
+  "TypeBot",
+  "SpeedTyper",
+  "KeyMaster",
+  "WordWizard",
+  "RapidKeys",
+  "SwiftFingers",
+  "TypePro",
+  "KeyboardKing",
+  "QuickType",
+  "FlashKeys",
+  "TurboTyper",
+  "NinjaKeys",
 ];
 
 const playerColors = [
-  "#3498db", "#e74c3c", "#2ecc71", "#f39c12",
-  "#9b59b6", "#1abc9c", "#d35400", "#34495e",
+  "#3498db",
+  "#e74c3c",
+  "#2ecc71",
+  "#f39c12",
+  "#9b59b6",
+  "#1abc9c",
+  "#d35400",
+  "#34495e",
 ];
 
 // Computer player simulation (client-side)
@@ -75,7 +90,13 @@ class ComputerPlayer {
   private startTime: number | null = null;
   private updateInterval: NodeJS.Timeout | null = null;
 
-  constructor(id: string, name: string, color: string, difficulty: string, textLength: number) {
+  constructor(
+    id: string,
+    name: string,
+    color: string,
+    difficulty: string,
+    textLength: number
+  ) {
     this.id = id;
     this.name = name;
     this.color = color;
@@ -116,8 +137,12 @@ class ComputerPlayer {
       if (!this.startTime || this.finished) return;
 
       const elapsedMinutes = (Date.now() - this.startTime) / 60000;
-      const speedVariation = Math.sin(Date.now() / 5000) * (1 - this.consistencyFactor) * 10;
-      const currentWPM = Math.max(this.minWPM, Math.min(this.maxWPM, this.wpm + speedVariation));
+      const speedVariation =
+        Math.sin(Date.now() / 5000) * (1 - this.consistencyFactor) * 10;
+      const currentWPM = Math.max(
+        this.minWPM,
+        Math.min(this.maxWPM, this.wpm + speedVariation)
+      );
       const charsTyped = currentWPM * 5 * elapsedMinutes;
 
       this.progress = Math.min(100, (charsTyped / this.textLength) * 100);
@@ -149,7 +174,7 @@ class ComputerPlayer {
   }
 }
 // Near the top with other constants
-const GAME_TIME_LIMIT = 3 * 60; // 3 minutes in seconds
+const GAME_TIME_LIMIT = 1 * 60;
 
 export default function RacePage() {
   const params = useParams();
@@ -159,12 +184,17 @@ export default function RacePage() {
   const isComputerMode = searchParams.get("mode") === "computer";
   const numBots = Number.parseInt(searchParams.get("bots") || "3", 10);
   const difficulty = searchParams.get("difficulty") || "medium";
+  const [gameTimeRemaining, setGameTimeRemaining] = useState<number>(GAME_TIME_LIMIT);
+  const gameTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Add a new state for the game timer
-    const [gameTimeRemaining, setGameTimeRemaining] = useState<number>(GAME_TIME_LIMIT);
-    const gameTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const { socket, gameState, connectSocket, startRace: startSocketRace, updateProgress, playerFinished } = useSocket();
+  const {
+    socket,
+    gameState,
+    connectSocket,
+    startRace: startSocketRace,
+    updateProgress,
+    playerFinished,
+  } = useSocket();
   const [localGameState, setLocalGameState] = useState<GameState>({
     status: "waiting",
     players: [],
@@ -179,6 +209,8 @@ export default function RacePage() {
   const [computerPlayers, setComputerPlayers] = useState<ComputerPlayer[]>([]);
   const [showResultsModal, setShowResultsModal] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false); // New flag to prevent re-init
+  const socketInitialized = useRef(false);
+
 
   const typingAreaRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -187,12 +219,22 @@ export default function RacePage() {
     (text: string) => {
       const bots: ComputerPlayer[] = [];
       for (let i = 0; i < numBots; i++) {
-        const botName = botNames[Math.floor(Math.random() * botNames.length)] + (i + 1);
+        const botName =
+          botNames[Math.floor(Math.random() * botNames.length)] + (i + 1);
         const botColor = playerColors[(i + 1) % playerColors.length];
         const botId = `bot-${raceId}-${i}`;
-        const botDifficulty = difficulty === "mixed" ? ["easy", "medium", "hard"][Math.floor(Math.random() * 3)] : difficulty;
+        const botDifficulty =
+          difficulty === "mixed"
+            ? ["easy", "medium", "hard"][Math.floor(Math.random() * 3)]
+            : difficulty;
 
-        const computerPlayer = new ComputerPlayer(botId, botName, botColor, botDifficulty, text.length);
+        const computerPlayer = new ComputerPlayer(
+          botId,
+          botName,
+          botColor,
+          botDifficulty,
+          text.length
+        );
         bots.push(computerPlayer);
       }
       return bots;
@@ -248,7 +290,8 @@ export default function RacePage() {
     if (hasInitialized) return; // Prevent re-running
 
     if (isComputerMode) {
-      const randomText = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
+      const randomText =
+        sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
       const localPlayerId = `player-${Date.now()}`;
       setPlayerId(localPlayerId);
 
@@ -277,11 +320,28 @@ export default function RacePage() {
       setLocalGameState(initialState);
       setComputerPlayers(bots);
     } else {
-      connectSocket(raceId, playerName, false);
+        if (!socket?.connected && !socketInitialized.current) {
+            connectSocket(raceId, playerName, false);
+            socketInitialized.current = true;
+          }
     }
 
-    setHasInitialized(true); // Mark as initialized
-  }, [isComputerMode, raceId, playerName, connectSocket, initializeComputerPlayers, hasInitialized]);
+    setHasInitialized(true); 
+     // Cleanup function for socket
+     return () => {
+        if (!isComputerMode && socket?.connected) {
+          socket.disconnect();
+        }
+      };
+  }, [
+    isComputerMode,
+    raceId,
+    playerName,
+    connectSocket,
+    initializeComputerPlayers,
+    hasInitialized,
+    socket?.connected
+  ]);
 
   // Set playerId for multiplayer mode (runs when socket connects)
   useEffect(() => {
@@ -305,7 +365,12 @@ export default function RacePage() {
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [isComputerMode, localGameState.status, gameState?.status, showResultsModal]); // Use status only
+  }, [
+    isComputerMode,
+    localGameState.status,
+    gameState?.status,
+    showResultsModal,
+  ]); // Use status only
 
   // Handle typing input
   const handleTyping = (input: string) => {
@@ -341,9 +406,16 @@ export default function RacePage() {
                 ...player,
                 progress,
                 wpm: prevState.startTime
-                  ? Math.round((correctPosition / 5) / ((Date.now() - prevState.startTime) / 60000))
+                  ? Math.round(
+                      correctPosition /
+                        5 /
+                        ((Date.now() - prevState.startTime) / 60000)
+                    )
                   : 0,
-                accuracy: correctPosition + errorCount > 0 ? 100 - (errorCount / (correctPosition + errorCount)) * 100 : 100,
+                accuracy:
+                  correctPosition + errorCount > 0
+                    ? 100 - (errorCount / (correctPosition + errorCount)) * 100
+                    : 100,
               }
             : player
         );
@@ -401,7 +473,8 @@ export default function RacePage() {
   // Handle restart
   const handleRestart = () => {
     if (isComputerMode) {
-      const randomText = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
+      const randomText =
+        sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
       computerPlayers.forEach((bot) => bot.stopTyping());
       setCurrentInput("");
       setCurrentPosition(0);
@@ -438,41 +511,45 @@ export default function RacePage() {
 
   // Add a new effect to handle the game timer
   useEffect(() => {
-    if ((isComputerMode ? localGameState.status : gameState?.status) === "racing") {
+    if (
+      (isComputerMode ? localGameState.status : gameState?.status) === "racing"
+    ) {
       // Start the timer when race begins
       gameTimerRef.current = setInterval(() => {
-        setGameTimeRemaining(prev => {
+        setGameTimeRemaining((prev) => {
           if (prev <= 1) {
             // Time's up - end the race
             if (isComputerMode) {
-              setLocalGameState(prevState => ({
+              setLocalGameState((prevState) => ({
                 ...prevState,
                 status: "finished",
-                endTime: Date.now()
+                endTime: Date.now(),
               }));
-              computerPlayers.forEach(bot => bot.stopTyping());
+              computerPlayers.forEach((bot) => bot.stopTyping());
             } else if (socket) {
               // For multiplayer, we could emit an event to end the race
               // This depends on your socket implementation
               playerFinished();
             }
-            
+
             // Clear the interval
             if (gameTimerRef.current) {
               clearInterval(gameTimerRef.current);
               gameTimerRef.current = null;
             }
-            
+
             return 0;
           }
           return prev - 1;
         });
       }, 1000);
-    } else if ((isComputerMode ? localGameState.status : gameState?.status) === "waiting") {
+    } else if (
+      (isComputerMode ? localGameState.status : gameState?.status) === "waiting"
+    ) {
       // Reset timer when in waiting state
       setGameTimeRemaining(GAME_TIME_LIMIT);
     }
-    
+
     return () => {
       if (gameTimerRef.current) {
         clearInterval(gameTimerRef.current);
@@ -481,17 +558,15 @@ export default function RacePage() {
     };
   }, [isComputerMode ? localGameState.status : gameState?.status]);
 
-
   const activeGameState = isComputerMode ? localGameState : gameState;
   const currentPlayer = activeGameState?.players.find((p) => p.id === playerId);
 
-    // Add a function to format the time
-    const formatTime = (seconds: number): string => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-      };
-    
+  // Add a function to format the time
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-4">
@@ -500,7 +575,9 @@ export default function RacePage() {
           <h1 className="text-3xl font-bold text-blue-800">Race #{raceId}</h1>
           <div className="flex items-center justify-between">
             <p className="text-blue-600">
-              Status: {activeGameState?.status.charAt(0).toUpperCase() + activeGameState?.status.slice(1)}
+              Status:{" "}
+              {activeGameState?.status.charAt(0).toUpperCase() +
+                activeGameState?.status.slice(1)}
             </p>
             {isComputerMode && (
               <div className="flex items-center text-sm text-blue-600">
@@ -520,26 +597,38 @@ export default function RacePage() {
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-lg shadow-lg p-4 h-64">
-              <RaceTrack players={activeGameState?.players || []} currentPlayerId={playerId || ""} />
+              <RaceTrack
+                players={activeGameState?.players || []}
+                currentPlayerId={playerId || ""}
+              />
             </div>
 
             <div className="bg-white rounded-lg shadow-lg p-4">
-              {activeGameState?.status === "racing" || activeGameState?.status === "finished" ? (
+              {activeGameState?.status === "racing" ||
+              activeGameState?.status === "finished" ? (
                 <TypingArea
                   text={activeGameState.text}
                   currentPosition={currentPosition}
                   input={currentInput}
                   onInputChange={handleTyping}
-                  disabled={activeGameState.status === "finished" || !!currentPlayer?.finished}
+                  disabled={
+                    activeGameState.status === "finished" ||
+                    !!currentPlayer?.finished
+                  }
                   ref={typingAreaRef}
                 />
               ) : (
                 <div className="text-center p-6">
                   <p className="text-lg text-gray-600">
-                    {activeGameState?.status === "waiting" ? "Waiting for the race to start..." : "Get ready to race!"}
+                    {activeGameState?.status === "waiting"
+                      ? "Waiting for the race to start..."
+                      : "Get ready to race!"}
                   </p>
                   {activeGameState?.status === "waiting" && (
-                    <Button className="mt-4 bg-green-600 hover:bg-green-700" onClick={startRace}>
+                    <Button
+                      className="mt-4 bg-green-600 hover:bg-green-700"
+                      onClick={startRace}
+                    >
                       Start Race
                     </Button>
                   )}
@@ -553,49 +642,63 @@ export default function RacePage() {
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <p className="text-sm text-gray-500">Progress</p>
-                    <p className="text-xl font-bold">{Math.round(currentPlayer.progress)}%</p>
+                    <p className="text-xl font-bold">
+                      {Math.round(currentPlayer.progress)}%
+                    </p>
                     <Progress value={currentPlayer.progress} className="mt-1" />
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Speed</p>
-                    <p className="text-xl font-bold">{Math.round(currentPlayer.wpm)} WPM</p>
+                    <p className="text-xl font-bold">
+                      {Math.round(currentPlayer.wpm)} WPM
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Accuracy</p>
-                    <p className="text-xl font-bold">{Math.round(currentPlayer.accuracy)}%</p>
+                    <p className="text-xl font-bold">
+                      {Math.round(currentPlayer.accuracy)}%
+                    </p>
                   </div>
                 </div>
               </div>
             )}
           </div>
-      <div className="space-y-4">
-
-      {(activeGameState?.status === "racing" || activeGameState?.status === "countdown") && (
+          <div className="space-y-4">
+            {(activeGameState?.status === "racing" ||
+              activeGameState?.status === "countdown") && (
               <div className="bg-white rounded-lg shadow-lg p-4 text-center">
                 <h3 className="text-lg font-medium mb-2">Time Remaining</h3>
-                <div className={`text-2xl font-bold ${gameTimeRemaining < 30 ? 'text-red-600' : ''}`}>
+                <div
+                  className={`text-2xl font-bold ${
+                    gameTimeRemaining < 30 ? "text-red-600" : ""
+                  }`}
+                >
                   {formatTime(gameTimeRemaining)}
                 </div>
               </div>
             )}
 
-          <div className="bg-white rounded-lg shadow-lg p-4 h-fit">
-            <Leaderboard players={activeGameState?.players || []} currentPlayerId={playerId || ""} />
-          </div>
+            <div className="bg-white rounded-lg shadow-lg p-4 h-fit">
+              <Leaderboard
+                players={activeGameState?.players || []}
+                currentPlayerId={playerId || ""}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-
-      {activeGameState?.status === "finished" && activeGameState?.players && Array.isArray(activeGameState.players) && (
-        <RaceResultsModal
-          isOpen={showResultsModal}
-          onClose={() => setShowResultsModal(false)}
-          players={activeGameState.players}
-          currentPlayerId={playerId || ""}
-          onRestart={handleRestart}
-        />
-      )}
+      {activeGameState?.status === "finished" &&
+        activeGameState?.players &&
+        Array.isArray(activeGameState.players) && (
+          <RaceResultsModal
+            isOpen={showResultsModal}
+            onClose={() => setShowResultsModal(false)}
+            players={activeGameState.players}
+            currentPlayerId={playerId || ""}
+            onRestart={handleRestart}
+          />
+        )}
     </div>
   );
 }
