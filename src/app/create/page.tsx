@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // app/create/page.tsx
 "use client";
 
@@ -36,7 +37,7 @@ export default function CreateRace() {
     setRaceCreated(true);
 
     // Connect to the socket with the race details
-    connectSocket(generatedCode, playerName, true, 0, difficulty); // Assuming 3 bots for now
+    connectSocket(generatedCode, playerName, true, 0, difficulty);
   };
 
   const handleStartRace = () => {
@@ -97,7 +98,7 @@ export default function CreateRace() {
                 </div>
 
 
-                <div className="flex items-center space-x-2">
+                {/* <div className="flex items-center space-x-2">
                   <Switch id="use-bot" checked={useBot} onCheckedChange={setUseBot} />
                   <Label htmlFor="use-bot">Add Bots</Label>
                 </div>
@@ -113,7 +114,7 @@ export default function CreateRace() {
                       onChange={(e) => setBotCount(parseInt(e.target.value))}
                     />
                   </div>
-                )}
+                )} */}
 
                 {error && <div className="text-red-500 text-sm">{error}</div>}
               </div>

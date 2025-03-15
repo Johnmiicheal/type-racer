@@ -31,7 +31,7 @@ Typing Race Game allows users to practice their typing speed and accuracy in an 
 
 ### 3. Multiplayer Mode (In Progress)
 - **Description**: Race against other real players in real-time using Socket.IO for synchronization.
-- **Status**: In development. Core functionality (room creation, joining, and typing updates) is implemented but currently experiences infinite loop issues with `useEffect`. Work is ongoing to stabilize this mode.
+- **Status**: Complete but some users have needed to refresh the page to sync with other players
 - **How to Play (WIP)**:
   1. Create a race at `/create`.
   2. Share the race code with friends.
@@ -45,8 +45,8 @@ Typing Race Game allows users to practice their typing speed and accuracy in an 
 
 ## Project Setup
 
-### Backend <coming soon>
-1. **Navigate to the backend directory** (if separate, e.g., `backend/`):
+### Backend
+1. **Navigate to the backend directory** ([git/racer-socket](https://github.com/johnmiicheal/racer-socket.git)):
    ```bash
    cd backend
    ```
@@ -73,14 +73,15 @@ Typing Race Game allows users to practice their typing speed and accuracy in an 
 ## Development Status
 - Practice Mode: Complete and stable.
 - Player vs. Computer: Complete and stable.
-- Multiplayer Mode: In progress. Issues with infinite `useEffect` loops in `race/[id]/page.tsx` are being debugged. The Socket.IO server handles room creation and real-time updates, but frontend synchronization needs refinement.
+- Multiplayer Mode: Complete and mostly stable.
+
 
 ## Future Improvements
-- Stabilize Multiplayer: Fix infinite loop issues and ensure smooth real-time updates.
+- Bot + Players: Fix Bots + Players in private races
 - Public Races: Implement a public race list for joining random games.
 - Custom Texts: Allow users to input custom typing texts.
 - Enhanced UI: Add animations and sound effects for a more immersive experience.
-- Deployment: Deploy backend (e.g., Render) and frontend (e.g., Vercel) for online play.
+
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for details.
