@@ -29,7 +29,7 @@ Typing Race Game allows users to practice their typing speed and accuracy in an 
   - `difficulty`: `easy`, `medium`, `hard`, or `mixed`.
   - `bots`: Number of computer opponents (default: 3).
 
-### 3. Multiplayer Mode (In Progress)
+### 3. Multiplayer Mode
 - **Description**: Race against other real players in real-time using Socket.IO for synchronization.
 - **Status**: Complete but some users have needed to refresh the page to sync with other players
 - **How to Play (WIP)**:
@@ -78,7 +78,6 @@ Typing Race Game allows users to practice their typing speed and accuracy in an 
 
 ## Future Improvements
 - Bot + Players: Fix Bots + Players in private races
-- Public Races: Implement a public race list for joining random games.
 - Custom Texts: Allow users to input custom typing texts.
 - Enhanced UI: Add animations and sound effects for a more immersive experience.
 
