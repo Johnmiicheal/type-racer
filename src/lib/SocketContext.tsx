@@ -45,7 +45,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const connectSocket = useCallback((raceId: string, playerName: string, isComputerMode = false, numBots = 3, difficulty = 'medium') => {
     if (socket) socket.disconnect();
 
-    const newSocket = io('http://localhost:4000', {
+    const newSocket = io('https://racer-socket.onrender.com', {
       query: { raceId, playerName, isComputerMode: isComputerMode.toString(), numBots: numBots.toString(), difficulty },
     });
 
