@@ -88,3 +88,8 @@ This project is licensed under the MIT License. See the LICENSE file for details
 ## Acknowledgments
 Built with Next.js, Socket.IO, and Shadcn/UI.
 Inspired by typing race games like [TypeRacer](https://typeracer.com) and [Nitro Type](https://nitrotype.com).
+
+## Screenshots
+![Screenshot 2025-03-15 at 06 38 41](https://github.com/user-attachments/assets/7b86f62f-ddd9-457c-afb5-446b4a4b72ca)
+<img width="1787" alt="Screenshot 2025-03-15 at 06 38 50" src="https://github.com/user-attachments/assets/d7ac7a77-3bb4-4ff1-964d-6a8c5f233ade" />
+![Screenshot 2025-03-15 at 06 51 06](https://github.com/user-attachments/assets/c1d065ad-7a87-421c-9568-b2604a5d6ce2)
